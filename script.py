@@ -64,7 +64,7 @@ else:
     embedding = embeddings,
     persist_directory = "./chroma_db",
     )
-    print("New Vctor DB built")
+    print("New Vector DB built")
 
 
 # Retriever + Prompt + LLM + loop
@@ -113,4 +113,3 @@ while True:
         text = content
 
     print("\nAnswer:", text)
-
