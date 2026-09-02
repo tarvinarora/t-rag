@@ -81,7 +81,7 @@ Answer:"""
 
 prompt = PromptTemplate(
     template = template,
-    input_variables = {"context", "question"}
+    input_variables = ["context", "question"]
 )
 
 llm = ChatGoogleGenerativeAI(model = "gemini-3.6-flash")
@@ -90,26 +90,41 @@ llm = ChatGoogleGenerativeAI(model = "gemini-3.6-flash")
 def format_docs(docs):
     return "\n\n".join(doc.page_content for doc in docs)
 
-while True:
-    question = input("\nYour question (or 'quit'): ")
-    if question.lower() == "quit":
-        break
+#Intitial loop for run in VSCode will be replaced by Gradio loop
+# while True:
+#     question = input("\nYour question (or 'quit'): ")
+#     if question.lower() == "quit":
+#         break
 
-    docs = retriever.invoke(question) #retrieve the relevant chunks
+#     docs = retriever.invoke(question) #retrieve the relevant chunks
 
-    print("\n--- Retrieved from ---")
-    for d in docs:
-        print(f"{d.metadata['source']} p.{d.metadata['page']}") #Eval = bad chunks? or bad generation?
+#     print("\n--- Retrieved from ---")
+#     for d in docs:
+#         print(f"{d.metadata['source']} p.{d.metadata['page']}") #Eval = bad chunks? or bad generation?
 
-    context = format_docs(docs) #format the prompt ready for LLM
+#     context = format_docs(docs) #format the prompt ready for LLM
+#     final_prompt = prompt.format(context = context, question = question)
+
+#     answer = llm.invoke(final_prompt) #ask the LLM
+
+#     content = answer.content
+#     if isinstance(content, list):
+#         text = "".join(block["text"] for block in content if block.get("type") == "text")
+#     else:
+#         text = content
+
+#     print("\nAnswer:", text)
+
+#run the rag pipeline
+def get_answer(question):
+    docs = retriever.invoke(question)
+    context = format_docs(docs)
     final_prompt = prompt.format(context = context, question = question)
-
-    answer = llm.invoke(final_prompt) #ask the LLM
+    answer = llm.invoke(final_prompt)
 
     content = answer.content
     if isinstance(content, list):
-        text = "".join(block["text"] for block in content if block.get("type") == "text")
+        text = "".join(b["text"] for b in content if b.get("type") == "text")
     else:
         text = content
-
-    print("\nAnswer:", text)
+    return text

@@ -1,3 +1,6 @@
+from rag_setup import retriever, format_docs, prompt, llm, get_answer
+import re
+
 ## EVAL SECTION (LLM-as-judge)
 # Context Relevance: did the retriever fetch the right chunks?
 # Faithfulness: is the answer supported by "those chunks"?
@@ -17,20 +20,6 @@ eval_questions = [
     "Is Tarvin fluent in Agentic frameworks given her technical skills?",
     "What was Tarvin's tutoring focus during her work as a tutor?",
 ]
-
-#run the rag pipeline
-def get_answer(question):
-    docs = retriever.invoke(question)
-    context = format_docs(docs)
-    final_prompt = prompt.format(context = context, question = question)
-    answer = llm.invoke(final_prompt)
-
-    content = answer.content
-    if isinstance(content, list):
-        text = "".join(b["text"] for b in content if b.get("type") == "text")
-    else:
-        text = content
-    return text
 
 #LLM-as-judge
 judge_template = """You are evaluating a RAG system's answer.
@@ -59,11 +48,9 @@ def judge_relevance(question, answer):
         text = content
     return text
 
-import re
-
 scores = []
 for q in eval_questions:
-    answer = get_answer(q)
+    answer, docs = get_answer(q)
     verdict = judge_relevance(q, answer)
 
     # pull the number out of "Score: 4"
